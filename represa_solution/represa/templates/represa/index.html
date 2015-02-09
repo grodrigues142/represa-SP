@@ -1,0 +1,86 @@
+<html>
+  <head>
+  	<script src="//code.jquery.com/jquery-1.11.2.min.js"></script>
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script type="text/javascript">
+      
+      google.load("visualization", "1.1", {packages:["bar"]});
+      
+      google.setOnLoadCallback(ajaxRequestSituation);
+
+      function replace_val(par){
+      	par = par.replace("%", ""); 
+      	par = par.replace("mm", ""); 
+      	par = par.replace(",", "."); 
+      	par = par.replace(" ", ""); 
+      	return parseFloat(par);
+
+      }
+
+      function ajaxRequestSituation(){
+      	
+      	url = "/represa/fetch_and_draw_data/"
+
+      	var arr = [
+      		['Represas', 'volume armazenado (%)', 'pluviometria do dia (mm)', 'pluviometria acumulada no mês (mm)', 'média histórica do mês (mm)']
+      	]
+
+      	$.ajax({
+			dataType: "json",
+			url: url,
+			//data: data,
+			success: function(data){
+				
+				var items = [];
+				
+				$.each(data, function( key, val ) {
+				
+					nome_represa = val["name"];
+					volume_armazenado = replace_val(val.data[0].value);
+					pluviometria_do_dia = replace_val(val.data[1].value);
+					pluviometria_mes = replace_val(val.data[2].value);
+					media_historica = replace_val(val.data[3].value);
+
+					arr.push([nome_represa, volume_armazenado, pluviometria_do_dia, pluviometria_mes, media_historica]);
+				});
+
+				drawChart(arr);
+			}
+		});
+
+
+      	//arr.push(['Alto Tietê', 10, 10, 10, 10]);
+
+      	//arr.push(['aaaa', 10, 10, 20, 10]);
+
+      	
+
+      	drawChart(arr);
+
+      } 
+      
+      function drawChart(arr) {
+
+      	
+        
+        var data = google.visualization.arrayToDataTable(arr);
+
+        var options = {
+          chart: {
+            title: ' Situação dos Mananciais'
+            //subtitle: 'Sales, Expenses, and Profit: 2014-2017',
+          }
+        };
+
+        var chart = new google.charts.Bar(document.getElementById('columnchart_material'));
+
+        chart.draw(data, options);
+      }
+    </script>
+  </head>
+  <body>
+    <div id="columnchart_material" style="width: 1000px; height: 500px;"></div>
+  </body>
+</html>
+
+
